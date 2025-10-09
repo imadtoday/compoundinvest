@@ -144,6 +144,67 @@ const CampaignDetail = () => {
     }
   };
 
+  const getStatusBadgeStyle = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'complete':
+        return 'bg-green-100 text-green-800 border-green-200 hover:bg-green-200';
+      case 'new':
+        return 'bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-200';
+      case 'in_progress':
+      case 'intake_in_progress':
+        return 'bg-amber-100 text-amber-800 border-amber-200 hover:bg-amber-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200';
+    }
+  };
+
+  const getWorkflowStatusBadgeStyle = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'complete':
+        return 'bg-green-100 text-green-800 border-green-200 hover:bg-green-200';
+      case 'intake_in_progress':
+        return 'bg-amber-100 text-amber-800 border-amber-200 hover:bg-amber-200';
+      case 'consent_pending':
+        return 'bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200';
+    }
+  };
+
+  const getWorkflowStatusLabel = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'intake_in_progress':
+        return 'In Progress';
+      case 'complete':
+        return 'Complete';
+      case 'consent_pending':
+        return 'Consent Pending';
+      default:
+        return status.replace('_', ' ');
+    }
+  };
+
+  const getWorkflowLabel = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'workflow_1':
+        return 'Workflow 1';
+      case 'workflow_2':
+        return 'Workflow 2';
+      case 'workflow_4':
+        return 'Workflow 4';
+      case 'new':
+        return 'New';
+      case 'complete':
+        return 'Complete';
+      case 'in_progress':
+        return 'In Progress';
+      case 'intake_in_progress':
+        return 'Intake In Progress';
+      default:
+        return status.replace('_', ' ');
+    }
+  };
+
   const formatQuestionText = (text: string) => {
     if (!text) return '';
     // Remove newlines and clean up the text
@@ -601,10 +662,34 @@ const CampaignDetail = () => {
                 )}
               </div>
               <div>
-                <h4 className="font-medium text-sm text-muted-foreground">Status</h4>
-                <Badge variant={getStatusBadgeVariant(campaign.status)}>
-                  {campaign.status}
+                <h4 className="font-medium text-sm text-muted-foreground">Workflow</h4>
+                <Badge className={`font-medium px-3 py-1 transition-colors duration-200 ${getStatusBadgeStyle(campaign.status)}`}>
+                  {getWorkflowLabel(campaign.status)}
                 </Badge>
+              </div>
+              <div>
+                <h4 className="font-medium text-sm text-muted-foreground">Workflow Status</h4>
+                {campaign.status === 'workflow_1' && (campaign as any).workflow_1_status && (
+                  <Badge className={`font-medium px-3 py-1 transition-colors duration-200 ${getWorkflowStatusBadgeStyle((campaign as any).workflow_1_status)}`}>
+                    {getWorkflowStatusLabel((campaign as any).workflow_1_status)}
+                  </Badge>
+                )}
+                {campaign.status === 'workflow_2' && (campaign as any).workflow_2_status && (
+                  <Badge className={`font-medium px-3 py-1 transition-colors duration-200 ${getWorkflowStatusBadgeStyle((campaign as any).workflow_2_status)}`}>
+                    {getWorkflowStatusLabel((campaign as any).workflow_2_status)}
+                  </Badge>
+                )}
+                {campaign.status === 'workflow_4' && (campaign as any).workflow_4_status && (
+                  <Badge className={`font-medium px-3 py-1 transition-colors duration-200 ${getWorkflowStatusBadgeStyle((campaign as any).workflow_4_status)}`}>
+                    {getWorkflowStatusLabel((campaign as any).workflow_4_status)}
+                  </Badge>
+                )}
+                {((campaign.status === 'workflow_1' && !(campaign as any).workflow_1_status) ||
+                  (campaign.status === 'workflow_2' && !(campaign as any).workflow_2_status) ||
+                  (campaign.status === 'workflow_4' && !(campaign as any).workflow_4_status) ||
+                  !['workflow_1', 'workflow_2', 'workflow_4'].includes(campaign.status)) && (
+                  <span className="text-muted-foreground/50">-</span>
+                )}
               </div>
             </div>
             <div className="mt-4 pt-4 border-t border-border">
