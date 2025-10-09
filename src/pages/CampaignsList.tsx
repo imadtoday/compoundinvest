@@ -152,14 +152,14 @@ const CampaignsList = () => {
                           </Badge>
                         </TableCell>
                         <TableCell className="text-muted-foreground">
-                          {campaign.status === 'workflow_1' && (campaign as any).workflow_1_status && (
-                            <span>{(campaign as any).workflow_1_status.replace('_', ' ')}</span>
+                          {campaign.status === 'workflow_1' && (
+                            <span>{(campaign as any).workflow_1_status ? (campaign as any).workflow_1_status.replace('_', ' ') : '-'}</span>
                           )}
-                          {campaign.status === 'workflow_2' && (campaign as any).workflow_2_status && (
-                            <span>{(campaign as any).workflow_2_status.replace('_', ' ')}</span>
+                          {campaign.status === 'workflow_2' && (
+                            <span>{(campaign as any).workflow_2_status ? (campaign as any).workflow_2_status.replace('_', ' ') : '-'}</span>
                           )}
-                          {campaign.status === 'workflow_4' && (campaign as any).workflow_4_status && (
-                            <span>{(campaign as any).workflow_4_status.replace('_', ' ')}</span>
+                          {campaign.status === 'workflow_4' && (
+                            <span>{(campaign as any).workflow_4_status ? (campaign as any).workflow_4_status.replace('_', ' ') : '-'}</span>
                           )}
                           {!['workflow_1', 'workflow_2', 'workflow_4'].includes(campaign.status) && (
                             <span className="text-muted-foreground/50">-</span>
