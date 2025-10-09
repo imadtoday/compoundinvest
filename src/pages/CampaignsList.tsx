@@ -112,7 +112,7 @@ const CampaignsList = () => {
                     <TableRow className="bg-muted/50">
                       <TableHead className="font-semibold">Campaign Name</TableHead>
                       <TableHead className="font-semibold">Contact</TableHead>
-                      <TableHead className="font-semibold">Status</TableHead>
+                      <TableHead className="font-semibold">Workflow</TableHead>
                       <TableHead className="font-semibold">Created</TableHead>
                     </TableRow>
                   </TableHeader>
