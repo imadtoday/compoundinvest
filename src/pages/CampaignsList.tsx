@@ -113,6 +113,7 @@ const CampaignsList = () => {
                       <TableHead className="font-semibold">Campaign Name</TableHead>
                       <TableHead className="font-semibold">Contact</TableHead>
                       <TableHead className="font-semibold">Workflow</TableHead>
+                      <TableHead className="font-semibold">Workflow Status</TableHead>
                       <TableHead className="font-semibold">Created</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -151,6 +152,20 @@ const CampaignsList = () => {
                           </Badge>
                         </TableCell>
                         <TableCell className="text-muted-foreground">
+                          {campaign.status === 'workflow_1' && (campaign as any).workflow_1_status && (
+                            <span>{(campaign as any).workflow_1_status.replace('_', ' ')}</span>
+                          )}
+                          {campaign.status === 'workflow_2' && (campaign as any).workflow_2_status && (
+                            <span>{(campaign as any).workflow_2_status.replace('_', ' ')}</span>
+                          )}
+                          {campaign.status === 'workflow_4' && (campaign as any).workflow_4_status && (
+                            <span>{(campaign as any).workflow_4_status.replace('_', ' ')}</span>
+                          )}
+                          {!['workflow_1', 'workflow_2', 'workflow_4'].includes(campaign.status) && (
+                            <span className="text-muted-foreground/50">-</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
                           {formatInTimeZone(
                             new Date(campaign.created_at),
                             'Australia/Sydney',
@@ -161,7 +176,7 @@ const CampaignsList = () => {
                     ))}
                     {filteredCampaigns?.length === 0 && (
                       <TableRow>
-                        <TableCell colSpan={4} className="text-center py-12 text-muted-foreground">
+                        <TableCell colSpan={5} className="text-center py-12 text-muted-foreground">
                           No campaigns found matching your criteria
                         </TableCell>
                       </TableRow>
