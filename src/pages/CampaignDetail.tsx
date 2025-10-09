@@ -691,6 +691,12 @@ const CampaignDetail = () => {
                   <span className="text-muted-foreground/50">-</span>
                 )}
               </div>
+              {(campaign as any).first_followup && (
+                <div>
+                  <h4 className="font-medium text-sm text-muted-foreground">Followup Sent</h4>
+                  <p className="text-foreground">{formatSydneyTime((campaign as any).first_followup)}</p>
+                </div>
+              )}
             </div>
             <div className="mt-4 pt-4 border-t border-border">
               <div className="flex items-center justify-between mb-2">
