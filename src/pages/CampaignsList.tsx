@@ -81,6 +81,27 @@ const CampaignsList = () => {
     }
   };
 
+  const getWorkflowLabel = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'workflow_1':
+        return 'Workflow 1';
+      case 'workflow_2':
+        return 'Workflow 2';
+      case 'workflow_4':
+        return 'Workflow 4';
+      case 'new':
+        return 'New';
+      case 'complete':
+        return 'Complete';
+      case 'in_progress':
+        return 'In Progress';
+      case 'intake_in_progress':
+        return 'Intake In Progress';
+      default:
+        return status.replace('_', ' ');
+    }
+  };
+
   return (
     <div className="min-h-screen p-6 animate-fade-in">
       <div className="max-w-7xl mx-auto space-y-8">
@@ -174,7 +195,7 @@ const CampaignsList = () => {
                           <Badge 
                             className={`font-medium px-3 py-1 transition-colors duration-200 ${getStatusBadgeStyle(campaign.status)}`}
                           >
-                            {campaign.status.replace('_', ' ').toUpperCase()}
+                            {getWorkflowLabel(campaign.status)}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-muted-foreground">
