@@ -55,6 +55,32 @@ const CampaignsList = () => {
     }
   };
 
+  const getWorkflowStatusBadgeStyle = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'complete':
+        return 'bg-green-100 text-green-800 border-green-200 hover:bg-green-200';
+      case 'intake_in_progress':
+        return 'bg-amber-100 text-amber-800 border-amber-200 hover:bg-amber-200';
+      case 'consent_pending':
+        return 'bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200';
+    }
+  };
+
+  const getWorkflowStatusLabel = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'intake_in_progress':
+        return 'In Progress';
+      case 'complete':
+        return 'Complete';
+      case 'consent_pending':
+        return 'Consent Pending';
+      default:
+        return status.replace('_', ' ');
+    }
+  };
+
   return (
     <div className="min-h-screen p-6 animate-fade-in">
       <div className="max-w-7xl mx-auto space-y-8">
@@ -152,16 +178,25 @@ const CampaignsList = () => {
                           </Badge>
                         </TableCell>
                         <TableCell className="text-muted-foreground">
-                          {campaign.status === 'workflow_1' && (
-                            <span>{(campaign as any).workflow_1_status ? (campaign as any).workflow_1_status.replace('_', ' ') : '-'}</span>
+                          {campaign.status === 'workflow_1' && (campaign as any).workflow_1_status && (
+                            <Badge className={`font-medium px-3 py-1 transition-colors duration-200 ${getWorkflowStatusBadgeStyle((campaign as any).workflow_1_status)}`}>
+                              {getWorkflowStatusLabel((campaign as any).workflow_1_status)}
+                            </Badge>
                           )}
-                          {campaign.status === 'workflow_2' && (
-                            <span>{(campaign as any).workflow_2_status ? (campaign as any).workflow_2_status.replace('_', ' ') : '-'}</span>
+                          {campaign.status === 'workflow_2' && (campaign as any).workflow_2_status && (
+                            <Badge className={`font-medium px-3 py-1 transition-colors duration-200 ${getWorkflowStatusBadgeStyle((campaign as any).workflow_2_status)}`}>
+                              {getWorkflowStatusLabel((campaign as any).workflow_2_status)}
+                            </Badge>
                           )}
-                          {campaign.status === 'workflow_4' && (
-                            <span>{(campaign as any).workflow_4_status ? (campaign as any).workflow_4_status.replace('_', ' ') : '-'}</span>
+                          {campaign.status === 'workflow_4' && (campaign as any).workflow_4_status && (
+                            <Badge className={`font-medium px-3 py-1 transition-colors duration-200 ${getWorkflowStatusBadgeStyle((campaign as any).workflow_4_status)}`}>
+                              {getWorkflowStatusLabel((campaign as any).workflow_4_status)}
+                            </Badge>
                           )}
-                          {!['workflow_1', 'workflow_2', 'workflow_4'].includes(campaign.status) && (
+                          {((campaign.status === 'workflow_1' && !(campaign as any).workflow_1_status) ||
+                            (campaign.status === 'workflow_2' && !(campaign as any).workflow_2_status) ||
+                            (campaign.status === 'workflow_4' && !(campaign as any).workflow_4_status) ||
+                            !['workflow_1', 'workflow_2', 'workflow_4'].includes(campaign.status)) && (
                             <span className="text-muted-foreground/50">-</span>
                           )}
                         </TableCell>
