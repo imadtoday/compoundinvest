@@ -21,11 +21,14 @@ const Dashboard = () => {
         .from('campaigns')
         .select('id');
       
-      // Get completed campaigns
-      const { data: completedCampaigns } = await supabase
+      // Get workflow 1 completed campaigns
+      const completedResponse = await supabase
         .from('campaigns')
-        .select('id')
-        .eq('status', 'complete');
+        .select('*');
+      
+      const completedCampaigns = completedResponse.data?.filter(
+        (campaign: any) => campaign.workflow_1_status === 'complete'
+      );
       
       return { 
         totalContacts: allContacts?.length || 0,
