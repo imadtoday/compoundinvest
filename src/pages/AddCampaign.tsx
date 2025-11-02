@@ -10,18 +10,22 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeft, Plus, Megaphone } from "lucide-react";
+import { ArrowLeft, Plus, Megaphone, Check, ChevronsUpDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 const AddCampaign = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const [openContactCombobox, setOpenContactCombobox] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
     contact_id: "",
-    status: "new",
+    workflow_1_status: "CONSENT_PENDING",
     engagement_fee: "",
     success_fee: "",
     notes: ""
@@ -56,7 +60,7 @@ const AddCampaign = () => {
             is_active
           )
         `)
-        .eq('questionnaires.is_active', true)
+        .eq('questionnaire_id', '2bf87f22-142d-4db7-aa2c-9dc6d63da39d')
         .order('ordinal', { ascending: true });
       
       return data || [];
@@ -191,13 +195,33 @@ const AddCampaign = () => {
 
   const createCampaignMutation = useMutation({
     mutationFn: async (campaignData: any) => {
-      // First create the campaign
+      // Determine base domain for this project and create the campaign with a client-generated id
+      const getProjectDomain = () => {
+        const hostname = window.location.hostname;
+        
+        // If already on custom domain, use it
+        if (!hostname.includes('lovableproject.com') && !hostname.includes('lovable.app')) {
+          return window.location.origin;
+        }
+        
+        // This is the dev Lovable project, so use dev custom domain
+        return 'https://dev-ci.datatube.app';
+      };
+
+      const domain = getProjectDomain();
+      const newCampaignId = crypto.randomUUID();
+      const campaignUrl = `${domain}/campaigns/${newCampaignId}`;
+      console.log('AddCampaign domain resolution', { hostname: window.location.hostname, origin: window.location.origin, resolvedDomain: domain, campaignUrl });
+
+      // Create the campaign with precomputed URL
       const { data: campaign, error: campaignError } = await supabase
         .from('campaigns')
         .insert({
+          id: newCampaignId,
           name: campaignData.name,
           contact_id: campaignData.contact_id,
-          status: campaignData.status,
+          status: 'workflow_1',
+          workflow_1_status: campaignData.workflow_1_status,
           engagement_fee: campaignData.engagement_fee,
           success_fee: campaignData.success_fee,
           notes: campaignData.notes || null,
@@ -205,22 +229,13 @@ const AddCampaign = () => {
           calendly_payload_json: {},
           answers: {},
           answered_questions: [],
-          skipped_questions: []
+          skipped_questions: [],
+          campaign_url: campaignUrl
         })
         .select()
         .single();
 
-      if (campaignError) throw campaignError;
-
-      // Update campaign with its URL
-      const campaignUrl = `${window.location.origin}/campaigns/${campaign.id}`;
-      const { error: updateError } = await supabase
-        .from('campaigns')
-        .update({ campaign_url: campaignUrl })
-        .eq('id', campaign.id);
-
-      if (updateError) throw updateError;
-
+      console.log('AddCampaign insert result', { campaignId: newCampaignId, campaignUrl, error: campaignError, data: campaign });
       if (campaignError) throw campaignError;
 
       // Then create campaign answers for any provided answers
@@ -360,30 +375,68 @@ const AddCampaign = () => {
 
                 <div className="space-y-2">
                   <Label htmlFor="contact">Contact *</Label>
-                  <Select value={formData.contact_id} onValueChange={(value) => setFormData(prev => ({ ...prev, contact_id: value }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a contact" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {contacts?.map((contact) => (
-                        <SelectItem key={contact.id} value={contact.id}>
-                          {contact.first_name} {contact.last_name} ({contact.email})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Popover open={openContactCombobox} onOpenChange={setOpenContactCombobox}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={openContactCombobox}
+                        className="w-full justify-between"
+                      >
+                        {formData.contact_id
+                          ? (() => {
+                              const selectedContact = contacts?.find(
+                                (contact) => contact.id === formData.contact_id
+                              );
+                              return selectedContact
+                                ? `${selectedContact.first_name} ${selectedContact.last_name} (${selectedContact.email})`
+                                : "Select a contact";
+                            })()
+                          : "Select a contact"}
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full p-0 bg-background z-50" align="start">
+                      <Command>
+                        <CommandInput placeholder="Search contacts..." className="h-9" />
+                        <CommandList>
+                          <CommandEmpty>No contact found.</CommandEmpty>
+                          <CommandGroup>
+                            {contacts?.map((contact) => (
+                              <CommandItem
+                                key={contact.id}
+                                value={`${contact.first_name} ${contact.last_name} ${contact.email}`}
+                                onSelect={() => {
+                                  setFormData(prev => ({ ...prev, contact_id: contact.id }));
+                                  setOpenContactCombobox(false);
+                                }}
+                              >
+                                {contact.first_name} {contact.last_name} ({contact.email})
+                                <Check
+                                  className={cn(
+                                    "ml-auto h-4 w-4",
+                                    formData.contact_id === contact.id ? "opacity-100" : "opacity-0"
+                                  )}
+                                />
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="status">Status</Label>
-                  <Select value={formData.status} onValueChange={(value) => setFormData(prev => ({ ...prev, status: value }))}>
+                  <Label htmlFor="workflow_1_status">Workflow 1 Status</Label>
+                  <Select value={formData.workflow_1_status} onValueChange={(value) => setFormData(prev => ({ ...prev, workflow_1_status: value }))}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="new">New</SelectItem>
-                      <SelectItem value="in_progress">In Progress</SelectItem>
-                      <SelectItem value="complete">Complete</SelectItem>
+                      <SelectItem value="CONSENT_PENDING">Consent pending</SelectItem>
+                      <SelectItem value="INTAKE_IN_PROGRESS">Intake in progress</SelectItem>
+                      <SelectItem value="COMPLETE">Complete</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

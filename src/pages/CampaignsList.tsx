@@ -5,13 +5,24 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Link, useSearchParams } from "react-router-dom";
 import { Megaphone, Search, Plus } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { formatInTimeZone } from "date-fns-tz";
 
 const CampaignsList = () => {
+  const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState("");
+  const [workflowFilter, setWorkflowFilter] = useState<string>("all");
+
+  // Set workflow filter from URL params on mount
+  useEffect(() => {
+    const workflowParam = searchParams.get("workflow");
+    if (workflowParam) {
+      setWorkflowFilter(workflowParam);
+    }
+  }, [searchParams]);
 
   const { data: campaigns, isLoading } = useQuery({
     queryKey: ['campaigns-list'],
@@ -24,11 +35,20 @@ const CampaignsList = () => {
             id,
             first_name,
             last_name
+          ),
+          messages (
+            sent_at
           )
         `)
         .order('created_at', { ascending: false });
       
-      return data || [];
+      // Calculate last activity for each campaign
+      return data?.map(campaign => ({
+        ...campaign,
+        lastActivity: campaign.messages?.length > 0 
+          ? new Date(Math.max(...campaign.messages.map((m: any) => new Date(m.sent_at).getTime())))
+          : null
+      })) || [];
     }
   });
 
@@ -38,8 +58,22 @@ const CampaignsList = () => {
       (campaign.contacts?.first_name?.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (campaign.contacts?.last_name?.toLowerCase().includes(searchTerm.toLowerCase()));
     
-    return matchesSearch;
+    const matchesWorkflow = workflowFilter === "all" || 
+      campaign.status === workflowFilter;
+    
+    return matchesSearch && matchesWorkflow;
   });
+
+  const formatWorkflowStatus = (status: string) => {
+    return status
+      .split('_')
+      .map((word, index) => 
+        index === 0 
+          ? word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+          : word.toLowerCase()
+      )
+      .join(' ');
+  };
 
   const getStatusBadgeStyle = (status: string) => {
     switch (status.toLowerCase()) {
@@ -56,16 +90,17 @@ const CampaignsList = () => {
   };
 
   const getWorkflowStatusBadgeStyle = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'complete':
-        return 'bg-green-100 text-green-800 border-green-200 hover:bg-green-200';
-      case 'intake_in_progress':
-        return 'bg-amber-100 text-amber-800 border-amber-200 hover:bg-amber-200';
-      case 'consent_pending':
-        return 'bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200';
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200';
+    const lowerStatus = status.toLowerCase();
+    if (lowerStatus === 'complete' || lowerStatus === 'accepted') {
+      return 'bg-green-100 text-green-800 border-green-200 hover:bg-green-200';
+    } else if (lowerStatus === 'intake_in_progress' || lowerStatus === 'sent' || lowerStatus === 'in_progress') {
+      return 'bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-200';
+    } else if (lowerStatus === 'pending_finance_pre_approval') {
+      return 'bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-200';
+    } else if (lowerStatus === 'consent_pending') {
+      return 'bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200';
     }
+    return 'bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200';
   };
 
   const getWorkflowStatusLabel = (status: string) => {
@@ -117,7 +152,7 @@ const CampaignsList = () => {
           </div>
         </div>
 
-        {/* Search and Add Button */}
+        {/* Search, Filter, and Add Button */}
         <div className="flex gap-4 flex-col sm:flex-row animate-slide-up">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
@@ -128,6 +163,17 @@ const CampaignsList = () => {
               className="input-premium pl-12 h-12 text-base"
             />
           </div>
+          <Select value={workflowFilter} onValueChange={setWorkflowFilter}>
+            <SelectTrigger className="w-full sm:w-[200px] h-12 bg-background">
+              <SelectValue placeholder="Filter by workflow" />
+            </SelectTrigger>
+            <SelectContent className="bg-background z-50">
+              <SelectItem value="all">All Workflows</SelectItem>
+              <SelectItem value="workflow_1">Workflow 1</SelectItem>
+              <SelectItem value="workflow_2">Workflow 2</SelectItem>
+              <SelectItem value="workflow_4">Workflow 4</SelectItem>
+            </SelectContent>
+          </Select>
           <Link to="/campaigns/add">
             <Button className="h-12 px-6 flex items-center gap-2">
               <Plus className="h-5 w-5" />
@@ -161,6 +207,7 @@ const CampaignsList = () => {
                       <TableHead className="font-semibold">Contact</TableHead>
                       <TableHead className="font-semibold">Workflow</TableHead>
                       <TableHead className="font-semibold">Workflow Status</TableHead>
+                      <TableHead className="font-semibold">Last Activity</TableHead>
                       <TableHead className="font-semibold">Created</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -195,30 +242,41 @@ const CampaignsList = () => {
                           <Badge 
                             className={`font-medium px-3 py-1 transition-colors duration-200 ${getStatusBadgeStyle(campaign.status)}`}
                           >
-                            {getWorkflowLabel(campaign.status)}
+                            {campaign.status === 'workflow_1' ? 'Workflow 1' : 
+                             campaign.status === 'workflow_2' ? 'Workflow 2' : 
+                             campaign.status === 'workflow_4' ? 'Workflow 4' :
+                             campaign.status.replace('_', ' ').toUpperCase()}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-muted-foreground">
                           {campaign.status === 'workflow_1' && (campaign as any).workflow_1_status && (
-                            <Badge className={`font-medium px-3 py-1 transition-colors duration-200 ${getWorkflowStatusBadgeStyle((campaign as any).workflow_1_status)}`}>
-                              {getWorkflowStatusLabel((campaign as any).workflow_1_status)}
+                            <Badge className={`font-medium px-3 py-1 ${getWorkflowStatusBadgeStyle((campaign as any).workflow_1_status as string)}`}>
+                              {formatWorkflowStatus((campaign as any).workflow_1_status as string)}
                             </Badge>
                           )}
                           {campaign.status === 'workflow_2' && (campaign as any).workflow_2_status && (
-                            <Badge className={`font-medium px-3 py-1 transition-colors duration-200 ${getWorkflowStatusBadgeStyle((campaign as any).workflow_2_status)}`}>
-                              {getWorkflowStatusLabel((campaign as any).workflow_2_status)}
+                            <Badge className={`font-medium px-3 py-1 ${getWorkflowStatusBadgeStyle((campaign as any).workflow_2_status as string)}`}>
+                              {formatWorkflowStatus((campaign as any).workflow_2_status as string)}
                             </Badge>
                           )}
                           {campaign.status === 'workflow_4' && (campaign as any).workflow_4_status && (
-                            <Badge className={`font-medium px-3 py-1 transition-colors duration-200 ${getWorkflowStatusBadgeStyle((campaign as any).workflow_4_status)}`}>
-                              {getWorkflowStatusLabel((campaign as any).workflow_4_status)}
+                            <Badge className={`font-medium px-3 py-1 ${getWorkflowStatusBadgeStyle((campaign as any).workflow_4_status as string)}`}>
+                              {formatWorkflowStatus((campaign as any).workflow_4_status as string)}
                             </Badge>
                           )}
-                          {((campaign.status === 'workflow_1' && !(campaign as any).workflow_1_status) ||
-                            (campaign.status === 'workflow_2' && !(campaign as any).workflow_2_status) ||
-                            (campaign.status === 'workflow_4' && !(campaign as any).workflow_4_status) ||
-                            !['workflow_1', 'workflow_2', 'workflow_4'].includes(campaign.status)) && (
-                            <span className="text-muted-foreground/50">-</span>
+                          {campaign.status !== 'workflow_1' && campaign.status !== 'workflow_2' && campaign.status !== 'workflow_4' && (
+                            <span className="text-muted-foreground">-</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {(campaign as any).lastActivity ? (
+                            formatInTimeZone(
+                              (campaign as any).lastActivity,
+                              'Australia/Sydney',
+                              'dd/MM/yyyy HH:mm'
+                            )
+                          ) : (
+                            <span className="text-muted-foreground/60">No messages</span>
                           )}
                         </TableCell>
                         <TableCell className="text-muted-foreground">
@@ -230,13 +288,13 @@ const CampaignsList = () => {
                         </TableCell>
                       </TableRow>
                     ))}
-                    {filteredCampaigns?.length === 0 && (
-                      <TableRow>
-                        <TableCell colSpan={5} className="text-center py-12 text-muted-foreground">
-                          No campaigns found matching your criteria
-                        </TableCell>
-                      </TableRow>
-                    )}
+                     {filteredCampaigns?.length === 0 && (
+                       <TableRow>
+                         <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
+                           No campaigns found matching your criteria
+                         </TableCell>
+                       </TableRow>
+                     )}
                   </TableBody>
                 </Table>
               </div>
