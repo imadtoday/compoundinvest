@@ -21,19 +21,37 @@ const Dashboard = () => {
         .from('campaigns')
         .select('id');
       
-      // Get workflow 1 completed campaigns
-      const completedResponse = await supabase
+      // Get workflow 1 campaigns
+      const { data: workflow1Campaigns } = await supabase
         .from('campaigns')
-        .select('*');
+        .select('id')
+        .eq('status', 'workflow_1');
       
-      const completedCampaigns = completedResponse.data?.filter(
-        (campaign: any) => campaign.workflow_1_status === 'complete'
-      );
+      // Get workflow 2 campaigns
+      const { data: workflow2Campaigns } = await supabase
+        .from('campaigns')
+        .select('id')
+        .eq('status', 'workflow_2');
+      
+      // Get workflow 3 campaigns
+      const { data: workflow3Campaigns } = await supabase
+        .from('campaigns')
+        .select('id')
+        .eq('status', 'workflow_3');
+      
+      // Get workflow 4 campaigns
+      const { data: workflow4Campaigns } = await supabase
+        .from('campaigns')
+        .select('id')
+        .eq('status', 'workflow_4');
       
       return { 
         totalContacts: allContacts?.length || 0,
         totalCampaigns: allCampaigns?.length || 0,
-        completedWorkflows: completedCampaigns?.length || 0
+        workflow1Count: workflow1Campaigns?.length || 0,
+        workflow2Count: workflow2Campaigns?.length || 0,
+        workflow3Count: workflow3Campaigns?.length || 0,
+        workflow4Count: workflow4Campaigns?.length || 0
       };
     }
   });
@@ -62,8 +80,8 @@ const Dashboard = () => {
         </div>
 
         {/* Stats Cards with premium styling */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div className="premium-card animate-slide-up">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
+          <Link to="/contacts" className="premium-card animate-slide-up hover:scale-105 transition-transform duration-200 cursor-pointer">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">Total Contacts</CardTitle>
               <div className="p-2 bg-primary/10 rounded-lg">
@@ -72,11 +90,11 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-gradient-primary">{stats?.totalContacts || 0}</div>
-              <p className="text-xs text-muted-foreground mt-1">Active contacts in system</p>
+              <p className="text-xs text-muted-foreground mt-1">Active contacts</p>
             </CardContent>
-          </div>
+          </Link>
           
-          <div className="premium-card animate-slide-up" style={{ animationDelay: '0.1s' }}>
+          <Link to="/campaigns" className="premium-card animate-slide-up hover:scale-105 transition-transform duration-200 cursor-pointer" style={{ animationDelay: '0.1s' }}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">Total Campaigns</CardTitle>
               <div className="p-2 bg-accent/10 rounded-lg">
@@ -85,22 +103,61 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-gradient-gold">{stats?.totalCampaigns || 0}</div>
-              <p className="text-xs text-muted-foreground mt-1">Marketing campaigns</p>
+              <p className="text-xs text-muted-foreground mt-1">All campaigns</p>
             </CardContent>
-          </div>
+          </Link>
           
-          <div className="premium-card animate-slide-up" style={{ animationDelay: '0.2s' }}>
+          <Link to="/campaigns?workflow=workflow_1" className="premium-card animate-slide-up hover:scale-105 transition-transform duration-200 cursor-pointer" style={{ animationDelay: '0.2s' }}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Workflow 1 Complete</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Workflow 1</CardTitle>
+              <div className="p-2 bg-blue-500/10 rounded-lg">
+                <Clock className="h-5 w-5 text-blue-600" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-blue-600">{stats?.workflow1Count || 0}</div>
+              <p className="text-xs text-muted-foreground mt-1">In workflow 1</p>
+            </CardContent>
+          </Link>
+
+          <Link to="/campaigns?workflow=workflow_2" className="premium-card animate-slide-up hover:scale-105 transition-transform duration-200 cursor-pointer" style={{ animationDelay: '0.3s' }}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Workflow 2</CardTitle>
+              <div className="p-2 bg-purple-500/10 rounded-lg">
+                <Clock className="h-5 w-5 text-purple-600" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-purple-600">{stats?.workflow2Count || 0}</div>
+              <p className="text-xs text-muted-foreground mt-1">In workflow 2</p>
+            </CardContent>
+          </Link>
+
+          <Link to="/campaigns?workflow=workflow_3" className="premium-card animate-slide-up hover:scale-105 transition-transform duration-200 cursor-pointer" style={{ animationDelay: '0.4s' }}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Workflow 3</CardTitle>
+              <div className="p-2 bg-orange-500/10 rounded-lg">
+                <Clock className="h-5 w-5 text-orange-600" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-orange-600">{stats?.workflow3Count || 0}</div>
+              <p className="text-xs text-muted-foreground mt-1">In workflow 3</p>
+            </CardContent>
+          </Link>
+
+          <Link to="/campaigns?workflow=workflow_4" className="premium-card animate-slide-up hover:scale-105 transition-transform duration-200 cursor-pointer" style={{ animationDelay: '0.5s' }}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Workflow 4</CardTitle>
               <div className="p-2 bg-green-500/10 rounded-lg">
                 <CheckCircle className="h-5 w-5 text-green-600" />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-green-600">{stats?.completedWorkflows || 0}</div>
-              <p className="text-xs text-muted-foreground mt-1">Successfully completed</p>
+              <div className="text-3xl font-bold text-green-600">{stats?.workflow4Count || 0}</div>
+              <p className="text-xs text-muted-foreground mt-1">In workflow 4</p>
             </CardContent>
-          </div>
+          </Link>
         </div>
 
         {/* Latest Contacts with premium styling */}
