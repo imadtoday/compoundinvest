@@ -52,6 +52,7 @@ const CampaignDetail = () => {
   const [activeSection, setActiveSection] = useState('overview');
   // Scroll container refs
   const scrollAreaRef = useRef<HTMLDivElement | null>(null);
+  const viewportRef = useRef<HTMLDivElement | null>(null);
 
   // Template ID to name mapping
   const getTemplateName = (templateId: string) => {
@@ -84,7 +85,7 @@ const CampaignDetail = () => {
 
   const getWorkflowStatusBadgeStyle = (status: string) => {
     const lowerStatus = status.toLowerCase();
-    if (lowerStatus === 'complete' || lowerStatus === 'accepted') {
+    if (lowerStatus === 'complete' || lowerStatus === 'accepted' || lowerStatus === 'paid') {
       return 'bg-green-100 text-green-800 border-green-200 hover:bg-green-200';
     } else if (lowerStatus === 'intake_in_progress' || lowerStatus === 'sent' || lowerStatus === 'in_progress') {
       return 'bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-200';
@@ -466,6 +467,7 @@ const CampaignDetail = () => {
       default: return 'secondary';
     }
   };
+
 
   const handleCurrencyInput = (value: string, setter: (val: string) => void) => {
     const numericValue = value.replace(/[^\d]/g, '');
