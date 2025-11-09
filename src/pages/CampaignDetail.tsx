@@ -634,7 +634,7 @@ const CampaignDetail = () => {
     setIsSyncingProposals(true);
     setWatchProposals(true);
     try {
-      const baseUrl = 'https://datatube.app.n8n.cloud/webhook/1928db19-a525-43da-8564-16f4ac4dcb7a';
+      const baseUrl = 'https://datatube.app.n8n.cloud/webhook/b55da0bb-23b8-44bb-bb04-249c5b58c080';
       const params = new URLSearchParams({
         campaignId: campaign?.id || '',
         timestamp: new Date().toISOString(),
