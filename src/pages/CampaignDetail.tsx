@@ -484,7 +484,7 @@ const CampaignDetail = () => {
     if (sectionId === 'workflow3') {
       const status = (campaign as any)?.workflow_3_status;
       if (status === 'paid') return 'complete';
-      if (status === 'pending') return 'in_progress';
+      if (status === 'sent' || status === 'pending') return 'in_progress';
       return 'incomplete';
     }
     if (sectionId === 'workflow4') {
@@ -1196,14 +1196,20 @@ const CampaignDetail = () => {
                           {formatWorkflowStatus((campaign as any).workflow_2_status as string)}
                         </Badge>
                       )}
+                      {campaign.status === 'workflow_3' && (campaign as any).workflow_3_status && (
+                        <Badge className={`font-medium px-3 py-1 ${getWorkflowStatusBadgeStyle((campaign as any).workflow_3_status as string)}`}>
+                          {formatWorkflowStatus((campaign as any).workflow_3_status as string)}
+                        </Badge>
+                      )}
                       {campaign.status === 'workflow_4' && (campaign as any).workflow_4_status && (
                         <Badge className={`font-medium px-3 py-1 ${getWorkflowStatusBadgeStyle((campaign as any).workflow_4_status as string)}`}>
                           {formatWorkflowStatus((campaign as any).workflow_4_status as string)}
                         </Badge>
                       )}
-                      {(!['workflow_1', 'workflow_2', 'workflow_4'].includes(campaign.status) || 
+                      {(!['workflow_1', 'workflow_2', 'workflow_3', 'workflow_4'].includes(campaign.status) || 
                         (campaign.status === 'workflow_1' && !(campaign as any).workflow_1_status) ||
                         (campaign.status === 'workflow_2' && !(campaign as any).workflow_2_status) ||
+                        (campaign.status === 'workflow_3' && !(campaign as any).workflow_3_status) ||
                         (campaign.status === 'workflow_4' && !(campaign as any).workflow_4_status)) && (
                         <span className="text-muted-foreground">-</span>
                       )}
