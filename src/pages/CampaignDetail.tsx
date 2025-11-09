@@ -133,6 +133,31 @@ const CampaignDetail = () => {
     enabled: !!id
   });
 
+  // Set up real-time subscription for campaign updates
+  useEffect(() => {
+    if (!id) return;
+
+    const channel = supabase
+      .channel('campaign-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'campaigns',
+          filter: `id=eq.${id}`
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['campaign-detail', id] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [id, queryClient]);
+
   useEffect(() => {
     if (campaign) {
       setEngagementFee(campaign.engagement_fee ? formatCurrency(campaign.engagement_fee) : "");
@@ -280,6 +305,26 @@ const CampaignDetail = () => {
     };
   }, [id, queryClient]);
 
+  // Realtime updates for campaign workflow status changes
+  useEffect(() => {
+    if (!id) return;
+    const channel = supabase
+      .channel(`campaign:${id}`)
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'campaigns',
+        filter: `id=eq.${id}`,
+      }, () => {
+        queryClient.invalidateQueries({ queryKey: ["campaign-detail", id] });
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [id, queryClient]);
+
   // Initialize invoice settings from campaign data
   useEffect(() => {
     if (campaign) {
@@ -342,7 +387,7 @@ const CampaignDetail = () => {
     let rafId = 0;
 
     const setup = () => {
-      const rootEl = (document.querySelector('[data-radix-scroll-area-viewport]') as HTMLElement | null);
+      const rootEl = (viewportRef.current ?? (document.querySelector('[data-radix-scroll-area-viewport]') as HTMLElement | null));
       if (!rootEl) {
         rafId = requestAnimationFrame(setup);
         return;
@@ -1109,7 +1154,7 @@ const CampaignDetail = () => {
         </div>
 
           {/* Right Side - Scrollable Content */}
-          <ScrollArea ref={scrollAreaRef} className="flex-1 min-w-0 h-[calc(100vh-180px)]">
+          <ScrollArea ref={scrollAreaRef} viewportRef={viewportRef} className="flex-1 min-w-0 h-[calc(100vh-180px)]">
             <div className="space-y-6 pr-4 md:pr-6 lg:pr-8 break-words max-w-full min-w-0 overflow-x-hidden">
             {/* Campaign Overview Section */}
             <div ref={(el) => (sectionRefs.current['overview'] = el)}>
