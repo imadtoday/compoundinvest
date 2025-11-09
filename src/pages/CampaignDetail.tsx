@@ -566,7 +566,7 @@ const CampaignDetail = () => {
 
     setIsCreatingProposal(true);
     try {
-      const baseUrl = 'https://datatube.app.n8n.cloud/webhook/faf7ed5b-7569-4750-b59a-9b488b67ebcd';
+      const baseUrl = 'https://datatube.app.n8n.cloud/webhook/067a0a51-2aea-499c-a450-4190db16700c';
       const params = new URLSearchParams({
         campaignId: campaign.id,
         name: campaign.name || '',
