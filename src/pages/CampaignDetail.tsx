@@ -1092,9 +1092,9 @@ const CampaignDetail = () => {
       </div>
 
       {/* Main Content Area */}
-      <div className="max-w-7xl w-full mx-auto flex gap-6 p-6">
+      <div className="max-w-7xl w-full mx-auto flex gap-6 p-6 overflow-hidden">
         {/* Left Sidebar Navigation */}
-        <div className="w-64 flex-shrink-0">
+        <div className="w-64 flex-shrink-0 hidden md:block">
           <Card className="sticky top-6">
             <CardContent className="p-4">
               <nav className="space-y-1">
@@ -1121,9 +1121,10 @@ const CampaignDetail = () => {
           </Card>
         </div>
 
-          {/* Right Side - Scrollable Content */}
-          <ScrollArea ref={scrollAreaRef} viewportRef={viewportRef} className="flex-1 min-w-0 h-[calc(100vh-180px)]">
-            <div className="space-y-6 pr-4 md:pr-6 lg:pr-8 break-words max-w-full min-w-0 overflow-x-hidden">
+        {/* Right Side - Scrollable Content */}
+        <div className="flex-1 min-w-0 overflow-hidden">
+          <ScrollArea ref={scrollAreaRef} viewportRef={viewportRef} className="h-[calc(100vh-180px)]">
+            <div className="space-y-6 pr-4 break-words">
             {/* Campaign Overview Section */}
             <div ref={(el) => (sectionRefs.current['overview'] = el)}>
               <Card>
@@ -2009,8 +2010,9 @@ const CampaignDetail = () => {
                 </AlertDialog>
               </div>
             </div>
-          </div>
-        </ScrollArea>
+            </div>
+          </ScrollArea>
+        </div>
       </div>
     </div>
   );
