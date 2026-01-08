@@ -1124,7 +1124,7 @@ const CampaignDetail = () => {
         {/* Right Side - Scrollable Content */}
         <div className="flex-1 min-w-0 overflow-hidden">
           <ScrollArea ref={scrollAreaRef} viewportRef={viewportRef} className="h-[calc(100vh-180px)]">
-            <div className="space-y-6 pr-4 break-words">
+            <div className="space-y-6 pr-4 break-words min-w-0 w-full">
             <div ref={(el) => (sectionRefs.current['overview'] = el)}>
               <Card className="overflow-hidden">
                 <CardHeader>
@@ -1554,13 +1554,13 @@ const CampaignDetail = () => {
             </div>
 
             {/* Workflow 2 Section */}
-            <div ref={(el) => (sectionRefs.current['workflow2'] = el)}>
+            <div ref={(el) => (sectionRefs.current['workflow2'] = el)} className="min-w-0">
               <Card className="overflow-hidden">
                 <CardHeader>
                   <CardTitle>Workflow 2 - Proposals</CardTitle>
                   <CardDescription>{proposals.length} proposals created</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4 overflow-hidden">
+                <CardContent className="space-y-4 overflow-hidden min-w-0">
                   {/* Sync Proposals Button */}
                   <div className="border border-border rounded-lg p-4 bg-muted/50">
                     <h3 className="font-semibold mb-3 flex items-center gap-2">
@@ -1619,10 +1619,10 @@ const CampaignDetail = () => {
 
                   {/* Existing Proposals List */}
                   {proposals.length > 0 ? (
-                    <div className="space-y-4">
+                    <div className="space-y-4 min-w-0 overflow-hidden">
                       <h3 className="font-semibold text-lg">Existing Proposals</h3>
                       {proposals.map((proposal: any) => (
-                        <div key={proposal.id} className="border border-border rounded-lg p-4 max-w-full overflow-hidden">
+                        <div key={proposal.id} className="border border-border rounded-lg p-4 min-w-0 overflow-hidden">
                           <div className="flex items-start justify-between gap-4 mb-2">
                             <h4 className="font-medium flex-1 break-words">{getTemplateName(proposal.template_id)}</h4>
                             <Badge 
