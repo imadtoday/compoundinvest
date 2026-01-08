@@ -1125,9 +1125,8 @@ const CampaignDetail = () => {
         <div className="flex-1 min-w-0 overflow-hidden">
           <ScrollArea ref={scrollAreaRef} viewportRef={viewportRef} className="h-[calc(100vh-180px)]">
             <div className="space-y-6 pr-4 break-words">
-            {/* Campaign Overview Section */}
             <div ref={(el) => (sectionRefs.current['overview'] = el)}>
-              <Card>
+              <Card className="overflow-hidden">
                 <CardHeader>
                   <CardTitle>Campaign Overview</CardTitle>
                 </CardHeader>
@@ -1420,7 +1419,7 @@ const CampaignDetail = () => {
 
             {/* Workflow 1 Section */}
             <div ref={(el) => (sectionRefs.current['workflow1'] = el)}>
-              <Card>
+              <Card className="overflow-hidden">
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <div>
@@ -1556,12 +1555,12 @@ const CampaignDetail = () => {
 
             {/* Workflow 2 Section */}
             <div ref={(el) => (sectionRefs.current['workflow2'] = el)}>
-              <Card>
+              <Card className="overflow-hidden">
                 <CardHeader>
                   <CardTitle>Workflow 2 - Proposals</CardTitle>
                   <CardDescription>{proposals.length} proposals created</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-4 overflow-hidden">
                   {/* Sync Proposals Button */}
                   <div className="border border-border rounded-lg p-4 bg-muted/50">
                     <h3 className="font-semibold mb-3 flex items-center gap-2">
@@ -1584,14 +1583,14 @@ const CampaignDetail = () => {
                   </div>
 
                   {/* Create Proposal Section */}
-                  <div className="border border-border rounded-lg p-4 bg-muted/50">
+                  <div className="border border-border rounded-lg p-4 bg-muted/50 overflow-hidden">
                     <h3 className="font-semibold mb-3 flex items-center gap-2">
                       <FileText className="h-4 w-4" />
                       Create New Proposal
                     </h3>
-                    <div className="flex flex-wrap items-center gap-2 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
                       <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
-                        <SelectTrigger className="flex-1 basis-0 min-w-0">
+                        <SelectTrigger className="flex-1 min-w-[200px] max-w-full">
                           <SelectValue placeholder="Select proposal template..." />
                         </SelectTrigger>
                         <SelectContent>
@@ -1691,12 +1690,12 @@ const CampaignDetail = () => {
 
             {/* Workflow 3 Section */}
             <div ref={(el) => (sectionRefs.current['workflow3'] = el)}>
-              <Card>
+              <Card className="overflow-hidden">
                 <CardHeader>
                   <CardTitle>Workflow 3 - Invoices</CardTitle>
                   <CardDescription>{invoices.length} invoices created</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-4 overflow-hidden">
                   {/* Sync Invoices Button */}
                   <div className="border border-border rounded-lg p-4 bg-muted/50">
                     <h3 className="font-semibold mb-3 flex items-center gap-2">
@@ -1769,12 +1768,12 @@ const CampaignDetail = () => {
 
             {/* Workflow 4 Section */}
             <div ref={(el) => (sectionRefs.current['workflow4'] = el)}>
-              <Card>
+              <Card className="overflow-hidden">
                 <CardHeader>
                   <CardTitle>Workflow 4 - Purchasing Entity Details</CardTitle>
                   <CardDescription>{workflow4Answers.length} questions answered</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-4 overflow-hidden">
                   {(campaign as any)?.workflow_4_status === 'in_progress' || (campaign as any)?.workflow_4_status === 'complete' ? (
                     <>
                       {workflow4Answers.length > 0 ? (
@@ -1911,12 +1910,12 @@ const CampaignDetail = () => {
 
             {/* Notes Section */}
             <div ref={(el) => (sectionRefs.current['notes'] = el)}>
-              <Card>
+              <Card className="overflow-hidden">
                 <CardHeader>
                   <CardTitle>Notes</CardTitle>
                   <CardDescription>{notes.length} notes</CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="overflow-hidden">
                   <div className="space-y-4">
                     <div className="flex gap-2">
                       <Textarea
@@ -1945,7 +1944,7 @@ const CampaignDetail = () => {
 
             {/* Transcript Section */}
             <div ref={(el) => (sectionRefs.current['transcript'] = el)}>
-              <Card>
+              <Card className="overflow-hidden">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <MessageCircle className="h-5 w-5" />
@@ -1953,7 +1952,7 @@ const CampaignDetail = () => {
                   </CardTitle>
                   <CardDescription>{messages?.length || 0} messages</CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="overflow-hidden">
                   {messages && messages.length > 0 ? (
                     <div className="space-y-3">
                       {messages.map((message: any, index: number) => (
