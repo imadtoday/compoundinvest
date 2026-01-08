@@ -12,7 +12,6 @@ import { Input } from "@/components/ui/input";
 import { formatInTimeZone, toZonedTime } from "date-fns-tz";
 import { format } from "date-fns";
 import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useState, useEffect, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -49,9 +48,6 @@ const CampaignDetail = () => {
   // Navigation state
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const [activeSection, setActiveSection] = useState('overview');
-  // Scroll container refs
-  const scrollAreaRef = useRef<HTMLDivElement | null>(null);
-  const viewportRef = useRef<HTMLDivElement | null>(null);
 
   // Template ID to name mapping
   const getTemplateName = (templateId: string) => {
@@ -382,87 +378,68 @@ const CampaignDetail = () => {
   useEffect(() => {
     const sectionIds = ['overview', 'workflow1', 'workflow2', 'workflow3', 'workflow4', 'notes', 'transcript'];
 
-    let observer: IntersectionObserver | null = null;
-    let rafId = 0;
+    // We use normal page scrolling (no inner ScrollArea), so root is the viewport.
+    const rootEl: HTMLElement | null = null;
 
-    const setup = () => {
-      const rootEl = (viewportRef.current ?? (document.querySelector('[data-radix-scroll-area-viewport]') as HTMLElement | null));
-      if (!rootEl) {
-        rafId = requestAnimationFrame(setup);
-        return;
-      }
+    const computeNearestSection = () => {
+      const targetY = 40; // px from top of viewport
+      const baseTop = rootEl ? rootEl.getBoundingClientRect().top : 0;
 
-      observer = new IntersectionObserver(
-        (entries) => {
-          let bestId: string | null = null;
-          let bestRatio = 0;
+      const distances = sectionIds
+        .map((id) => {
+          const el = sectionRefs.current[id];
+          if (!el) return { id, dist: Number.POSITIVE_INFINITY };
+          const rect = el.getBoundingClientRect();
+          const topRelative = rect.top - baseTop;
+          return { id, dist: Math.abs(topRelative - targetY) };
+        })
+        .sort((a, b) => a.dist - b.dist);
 
-          entries.forEach((entry) => {
-            const id = (entry.target as HTMLElement).dataset.sectionId;
-            if (!id) return;
-            if (entry.isIntersecting && entry.intersectionRatio >= bestRatio) {
-              bestRatio = entry.intersectionRatio;
-              bestId = id;
-            }
-          });
-
-          if (bestId) {
-            setActiveSection(bestId);
-            return;
-          }
-
-          const targetY = 40; // px from top of scroll ROOT
-          const baseTop = rootEl.getBoundingClientRect().top;
-          const distances = sectionIds
-            .map((id) => {
-              const el = sectionRefs.current[id];
-              if (!el) return { id, dist: Number.POSITIVE_INFINITY };
-              const rect = el.getBoundingClientRect();
-              const topRelative = rect.top - baseTop;
-              return { id, dist: Math.abs(topRelative - targetY) };
-            })
-            .sort((a, b) => a.dist - b.dist);
-
-          if (distances.length) setActiveSection(distances[0].id);
-        },
-        {
-          root: rootEl,
-          rootMargin: '-40px 0px -50% 0px',
-          threshold: [0, 0.1, 0.25, 0.4, 0.5, 0.75, 1],
-        }
-      );
-
-      // Observe each section
-      sectionIds.forEach((id) => {
-        const el = sectionRefs.current[id];
-        if (el) {
-          el.setAttribute('data-section-id', id);
-          observer!.observe(el);
-        }
-      });
-
-      // Initial sync aligned to scroll root
-      setTimeout(() => {
-        const targetY = 40;
-        const baseTop = rootEl.getBoundingClientRect().top;
-        const distances = sectionIds
-          .map((id) => {
-            const el = sectionRefs.current[id];
-            if (!el) return { id, dist: Number.POSITIVE_INFINITY };
-            const rect = el.getBoundingClientRect();
-            const topRelative = rect.top - baseTop;
-            return { id, dist: Math.abs(topRelative - targetY) };
-          })
-          .sort((a, b) => a.dist - b.dist);
-        if (distances.length) setActiveSection(distances[0].id);
-      }, 100);
+      if (distances.length) setActiveSection(distances[0].id);
     };
 
-    setup();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        let bestId: string | null = null;
+        let bestRatio = 0;
+
+        entries.forEach((entry) => {
+          const id = (entry.target as HTMLElement).dataset.sectionId;
+          if (!id) return;
+          if (entry.isIntersecting && entry.intersectionRatio >= bestRatio) {
+            bestRatio = entry.intersectionRatio;
+            bestId = id;
+          }
+        });
+
+        if (bestId) {
+          setActiveSection(bestId);
+          return;
+        }
+
+        // Fallback: pick the nearest section to the top.
+        computeNearestSection();
+      },
+      {
+        root: rootEl,
+        rootMargin: '-40px 0px -50% 0px',
+        threshold: [0, 0.1, 0.25, 0.4, 0.5, 0.75, 1],
+      }
+    );
+
+    sectionIds.forEach((id) => {
+      const el = sectionRefs.current[id];
+      if (el) {
+        el.setAttribute('data-section-id', id);
+        observer.observe(el);
+      }
+    });
+
+    const t = window.setTimeout(computeNearestSection, 100);
 
     return () => {
-      if (observer) observer.disconnect();
-      if (rafId) cancelAnimationFrame(rafId);
+      window.clearTimeout(t);
+      observer.disconnect();
     };
   }, []);
 
@@ -1092,7 +1069,7 @@ const CampaignDetail = () => {
       </div>
 
       {/* Main Content Area */}
-      <div className="max-w-7xl w-full mx-auto flex gap-6 p-6 overflow-hidden">
+      <div className="max-w-7xl w-full mx-auto flex gap-6 p-6">
         {/* Left Sidebar Navigation */}
         <div className="w-64 flex-shrink-0 hidden md:block">
           <Card className="sticky top-6">
@@ -1122,9 +1099,8 @@ const CampaignDetail = () => {
         </div>
 
         {/* Right Side - Scrollable Content */}
-        <div className="flex-1 min-w-0 overflow-hidden">
-          <ScrollArea ref={scrollAreaRef} viewportRef={viewportRef} className="h-[calc(100vh-180px)]">
-            <div className="space-y-6 pr-4 break-words min-w-0 w-full">
+        <div className="flex-1 min-w-0">
+          <div className="space-y-6 pr-4 break-words min-w-0 w-full">
             <div ref={(el) => (sectionRefs.current['overview'] = el)}>
               <Card className="overflow-hidden">
                 <CardHeader>
@@ -2009,8 +1985,7 @@ const CampaignDetail = () => {
                 </AlertDialog>
               </div>
             </div>
-            </div>
-          </ScrollArea>
+          </div>
         </div>
       </div>
     </div>
