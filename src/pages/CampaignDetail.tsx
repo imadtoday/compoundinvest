@@ -702,10 +702,14 @@ const CampaignDetail = () => {
       });
 
       console.log('Syncing invoices with params:', Object.fromEntries(params));
-      // const response = await fetch(`${baseUrl}?${params.toString()}`, { method: 'GET' });
+      const response = await fetch(`${baseUrl}?${params.toString()}`, { method: 'GET' });
       
-      // Temporary placeholder - will be implemented when webhook URL is provided
-      toast({ title: "Info", description: "Invoice sync will be available once webhook URL is configured" });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      toast({ title: "Success", description: "Invoices synced successfully" });
+      queryClient.invalidateQueries({ queryKey: ['invoices', campaign?.id] });
       
     } catch (error: any) {
       console.error('Failed to sync invoices:', error);
