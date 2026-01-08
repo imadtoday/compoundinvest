@@ -61,12 +61,12 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => (
   <SidebarProvider>
     <div className="min-h-screen flex w-full">
       <AppSidebar />
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 min-w-0 flex flex-col">
         <header className="h-12 flex items-center justify-between border-b border-border bg-background px-4">
           <SidebarTrigger />
           <ProfileDropdown />
         </header>
-        <main className="flex-1 p-6">
+        <main className="flex-1 min-w-0 p-6">
           {children}
         </main>
       </div>
