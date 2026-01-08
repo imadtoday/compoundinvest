@@ -1590,7 +1590,7 @@ const CampaignDetail = () => {
                     </h3>
                     <div className="flex flex-wrap items-center gap-2">
                       <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
-                        <SelectTrigger className="flex-1 min-w-[200px] max-w-full">
+                        <SelectTrigger className="flex-1 basis-0 min-w-0">
                           <SelectValue placeholder="Select proposal template..." />
                         </SelectTrigger>
                         <SelectContent>
