@@ -171,6 +171,7 @@ const CampaignsList = () => {
               <SelectItem value="all">All Workflows</SelectItem>
               <SelectItem value="workflow_1">Workflow 1</SelectItem>
               <SelectItem value="workflow_2">Workflow 2</SelectItem>
+              <SelectItem value="workflow_3">Workflow 3</SelectItem>
               <SelectItem value="workflow_4">Workflow 4</SelectItem>
             </SelectContent>
           </Select>
@@ -244,6 +245,7 @@ const CampaignsList = () => {
                           >
                             {campaign.status === 'workflow_1' ? 'Workflow 1' : 
                              campaign.status === 'workflow_2' ? 'Workflow 2' : 
+                             campaign.status === 'workflow_3' ? 'Workflow 3' :
                              campaign.status === 'workflow_4' ? 'Workflow 4' :
                              campaign.status.replace('_', ' ').toUpperCase()}
                           </Badge>
@@ -259,12 +261,17 @@ const CampaignsList = () => {
                               {formatWorkflowStatus((campaign as any).workflow_2_status as string)}
                             </Badge>
                           )}
+                          {campaign.status === 'workflow_3' && (campaign as any).workflow_3_status && (
+                            <Badge className={`font-medium px-3 py-1 ${getWorkflowStatusBadgeStyle((campaign as any).workflow_3_status as string)}`}>
+                              {formatWorkflowStatus((campaign as any).workflow_3_status as string)}
+                            </Badge>
+                          )}
                           {campaign.status === 'workflow_4' && (campaign as any).workflow_4_status && (
                             <Badge className={`font-medium px-3 py-1 ${getWorkflowStatusBadgeStyle((campaign as any).workflow_4_status as string)}`}>
                               {formatWorkflowStatus((campaign as any).workflow_4_status as string)}
                             </Badge>
                           )}
-                          {campaign.status !== 'workflow_1' && campaign.status !== 'workflow_2' && campaign.status !== 'workflow_4' && (
+                          {campaign.status !== 'workflow_1' && campaign.status !== 'workflow_2' && campaign.status !== 'workflow_3' && campaign.status !== 'workflow_4' && (
                             <span className="text-muted-foreground">-</span>
                           )}
                         </TableCell>
