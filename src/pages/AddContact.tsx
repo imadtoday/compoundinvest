@@ -83,10 +83,20 @@ const AddContact = () => {
       });
       navigate(`/contacts/${data.id}`);
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      let description = "Failed to create contact. Please try again.";
+      if (error?.code === '23505') {
+        if (error.message?.includes('ux_contacts_phone')) {
+          description = "A contact with this phone number already exists.";
+        } else if (error.message?.includes('email')) {
+          description = "A contact with this email already exists.";
+        } else {
+          description = "A contact with these details already exists.";
+        }
+      }
       toast({
         title: "Error",
-        description: "Failed to create contact. Please try again.",
+        description,
         variant: "destructive",
       });
       console.error("Create contact error:", error);
