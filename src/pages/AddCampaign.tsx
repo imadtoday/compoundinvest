@@ -109,16 +109,15 @@ const AddCampaign = () => {
     
     let result = questionLines.join(' ').trim();
     
-    // Remove emojis and special unicode characters
-    result = result.replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{2B55}\u{FE00}-\u{FE0F}\u{200D}\u{20E3}\u{E0020}-\u{E007F}]/gu, '');
-    // Remove keycap number emojis (0️⃣ through 9️⃣)
-    result = result.replace(/[\d]\uFE0F?\u20E3/g, '');
-    // Remove any remaining variation selectors and combining marks
-    result = result.replace(/[\uFE0F\u20E3]/g, '');
+    // Remove asterisk-wrapped section headers like *3. Campaign Information*
+    result = result.replace(/\*\d+\.\s*[^*]+\*/g, '');
     
-    // Remove leading section headers like "1. Property Portfolio Goals" or numbered prefixes
-    // Match patterns like "1." or "1. Section Name" at the start, followed by the actual question
-    result = result.replace(/^\d+\.\s*[^?]*?\s*(?=What|How|Do |Are |Is |Which|Where|When|Why|Have|Has|Can|Could|Would|Should|Will|Did)/i, '');
+    // Remove section headers like "1. Property Portfolio Goals" before the actual question
+    // These are "N. Title Text" patterns followed by a number or emoji
+    result = result.replace(/^\s*\d+\.\s*[A-Z][A-Za-z &]+\s*/g, '');
+    
+    // Remove standalone numbers (keycap digit remnants like "1" "4") that aren't part of words
+    result = result.replace(/(?<!\w)\d+(?!\w)/g, '');
     
     // Clean up extra whitespace
     result = result.replace(/\s{2,}/g, ' ').trim();
