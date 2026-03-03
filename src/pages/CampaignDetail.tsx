@@ -505,7 +505,7 @@ const CampaignDetail = () => {
     if (!selectedTemplate || !campaign) return;
 
     // Check if workflow 1 is complete
-    if ((campaign as any).workflow_1_status !== 'complete') {
+    if ((campaign as any).workflow_1_status?.toLowerCase() !== 'complete') {
       const currentStatus = (campaign as any).workflow_1_status 
         ? formatWorkflowStatus((campaign as any).workflow_1_status) 
         : 'Not started';
