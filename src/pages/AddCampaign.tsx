@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ArrowLeft, Plus, Megaphone, Check, ChevronsUpDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
@@ -191,6 +192,10 @@ const AddCampaign = () => {
     }
 
     handleAnswerChange(questionCode, newValues, newLetters, currentAnswer.text);
+  };
+
+  const handleRadioChange = (questionCode: string, optionLetter: string, optionValue: string) => {
+    handleAnswerChange(questionCode, [optionValue], [optionLetter]);
   };
 
   const createCampaignMutation = useMutation({
@@ -507,19 +512,47 @@ const AddCampaign = () => {
                               </div>
                               
                               {question.type === 'choice' ? (
-                                <div className="space-y-3">
-                                  {getQuestionOptions(question).map((option) => {
-                                    const optionValue = getOptionText(question, option);
-                                    const isChecked = currentAnswer.letters?.includes(option) || false;
-                                    
-                                    return (
+                                question.code === 'cities' ? (
+                                  // Multi-select checkboxes for Q7 (cities)
+                                  <div className="space-y-3">
+                                    {getQuestionOptions(question).map((option) => {
+                                      const optionValue = getOptionText(question, option);
+                                      const isChecked = currentAnswer.letters?.includes(option) || false;
+                                      
+                                      return (
+                                        <div key={option} className="flex items-center space-x-2">
+                                          <Checkbox
+                                            id={`${question.code}-${option}`}
+                                            checked={isChecked}
+                                            onCheckedChange={(checked) => 
+                                              handleCheckboxChange(question.code, option, optionValue, checked === true)
+                                            }
+                                          />
+                                          <Label 
+                                            htmlFor={`${question.code}-${option}`}
+                                            className="text-sm font-normal cursor-pointer"
+                                          >
+                                            {`${option}) ${getOptionText(question, option)}`}
+                                          </Label>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                ) : (
+                                  // Single-select radio for Q1-Q6
+                                  <RadioGroup
+                                    value={currentAnswer.letters?.[0] || ""}
+                                    onValueChange={(value) => {
+                                      const optionValue = getOptionText(question, value);
+                                      handleRadioChange(question.code, value, optionValue);
+                                    }}
+                                    className="space-y-3"
+                                  >
+                                    {getQuestionOptions(question).map((option) => (
                                       <div key={option} className="flex items-center space-x-2">
-                                        <Checkbox
+                                        <RadioGroupItem
+                                          value={option}
                                           id={`${question.code}-${option}`}
-                                          checked={isChecked}
-                                          onCheckedChange={(checked) => 
-                                            handleCheckboxChange(question.code, option, optionValue, checked === true)
-                                          }
                                         />
                                         <Label 
                                           htmlFor={`${question.code}-${option}`}
@@ -531,9 +564,9 @@ const AddCampaign = () => {
                                           }
                                         </Label>
                                       </div>
-                                    );
-                                  })}
-                                </div>
+                                    ))}
+                                  </RadioGroup>
+                                )
                               ) : (
                                 <Textarea
                                   value={currentAnswer.text || ""}
