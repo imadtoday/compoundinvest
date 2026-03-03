@@ -107,7 +107,23 @@ const AddCampaign = () => {
       questionLines.push(line);
     }
     
-    return questionLines.join('\n').trim();
+    let result = questionLines.join(' ').trim();
+    
+    // Remove emojis and special unicode characters
+    result = result.replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{2B55}\u{FE00}-\u{FE0F}\u{200D}\u{20E3}\u{E0020}-\u{E007F}]/gu, '');
+    // Remove keycap number emojis (0️⃣ through 9️⃣)
+    result = result.replace(/[\d]\uFE0F?\u20E3/g, '');
+    // Remove any remaining variation selectors and combining marks
+    result = result.replace(/[\uFE0F\u20E3]/g, '');
+    
+    // Remove leading section headers like "1. Property Portfolio Goals" or numbered prefixes
+    // Match patterns like "1." or "1. Section Name" at the start, followed by the actual question
+    result = result.replace(/^\d+\.\s*[^?]*?\s*(?=What|How|Do |Are |Is |Which|Where|When|Why|Have|Has|Can|Could|Would|Should|Will|Did)/i, '');
+    
+    // Clean up extra whitespace
+    result = result.replace(/\s{2,}/g, ' ').trim();
+    
+    return result;
   };
 
   const getQuestionOptions = (question: any) => {
