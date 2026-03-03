@@ -506,9 +506,12 @@ const CampaignDetail = () => {
 
     // Check if workflow 1 is complete
     if ((campaign as any).workflow_1_status !== 'complete') {
+      const currentStatus = (campaign as any).workflow_1_status 
+        ? formatWorkflowStatus((campaign as any).workflow_1_status) 
+        : 'Not started';
       toast({
-        title: "Workflow 1 Incomplete",
-        description: "Please complete Workflow 1 before creating a proposal.",
+        title: "Workflow 1 Must Be Completed First",
+        description: `Workflow 1 (Intake) is currently "${currentStatus}". All intake questions must be fully answered before a proposal can be created. Please complete the intake questionnaire via WhatsApp first.`,
         variant: "destructive",
       });
       return;
