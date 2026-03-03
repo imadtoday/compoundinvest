@@ -109,17 +109,20 @@ const AddCampaign = () => {
     
     let result = questionLines.join(' ').trim();
     
+    // Remove ALL emojis and special unicode symbols
+    result = result.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}\u{FE0F}\u{20E3}\u{200D}]/gu, '');
+    
     // Remove asterisk-wrapped section headers like *3. Campaign Information*
     result = result.replace(/\*\d+\.\s*[^*]+\*/g, '');
     
     // Remove section headers like "1. Property Portfolio Goals" before the actual question
-    // These are "N. Title Text" patterns followed by a number or emoji
     result = result.replace(/^\s*\d+\.\s*[A-Z][A-Za-z &]+\s*/g, '');
     
-    // Remove standalone numbers (keycap digit remnants like "1" "4") that aren't part of words
+    // Remove standalone numbers (keycap digit remnants) that aren't part of words
     result = result.replace(/(?<!\w)\d+(?!\w)/g, '');
     
-    // Clean up extra whitespace
+    // Clean up extra whitespace and leading dots/periods
+    result = result.replace(/^\s*\.\s*/, '');
     result = result.replace(/\s{2,}/g, ' ').trim();
     
     return result;
