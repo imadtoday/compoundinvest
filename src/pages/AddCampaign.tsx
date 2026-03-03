@@ -509,7 +509,7 @@ const AddCampaign = () => {
                               {question.type === 'choice' ? (
                                 <div className="space-y-3">
                                   {getQuestionOptions(question).map((option) => {
-                                    const optionValue = `Option ${option}`;
+                                    const optionValue = getOptionText(question, option);
                                     const isChecked = currentAnswer.letters?.includes(option) || false;
                                     
                                     return (
