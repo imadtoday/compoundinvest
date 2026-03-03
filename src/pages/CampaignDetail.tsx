@@ -1181,7 +1181,7 @@ const CampaignDetail = () => {
                     <div>
                       <h4 className="font-medium text-sm text-muted-foreground">Source</h4>
                       {campaign.twilio_conversation_sid ? (
-                        <Badge variant="info">WhatsApp Bot</Badge>
+                        <Badge variant="info">Calendly Booking</Badge>
                       ) : (
                         <Badge variant="outline">Manually Created</Badge>
                       )}
