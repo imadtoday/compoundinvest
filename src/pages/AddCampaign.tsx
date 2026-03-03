@@ -26,7 +26,7 @@ const AddCampaign = () => {
   const [formData, setFormData] = useState({
     name: "",
     contact_id: "",
-    workflow_1_status: "CONSENT_PENDING",
+    workflow_1_status: "consent_pending",
     engagement_fee: "",
     success_fee: "",
     notes: ""
@@ -457,9 +457,9 @@ const AddCampaign = () => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="CONSENT_PENDING">Consent pending</SelectItem>
-                      <SelectItem value="INTAKE_IN_PROGRESS">Intake in progress</SelectItem>
-                      <SelectItem value="COMPLETE">Complete</SelectItem>
+                      <SelectItem value="consent_pending">Consent pending</SelectItem>
+                      <SelectItem value="intake_in_progress">Intake in progress</SelectItem>
+                      <SelectItem value="complete">Complete</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
