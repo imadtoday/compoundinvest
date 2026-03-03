@@ -1,18 +1,18 @@
 
 
-## Fix: Store full option text instead of "Option A/B" in manually created campaigns
+## Add "Source" indicator to Campaign Overview
 
-**Change:** In `src/pages/AddCampaign.tsx`, line 512, replace:
+**Change:** In `src/pages/CampaignDetail.tsx`, add a new grid item in the Campaign Overview section (after the existing fields around line 1164) that shows whether the campaign was manually created or automatically created via WhatsApp/Calendly.
 
-```js
-const optionValue = `Option ${option}`;
+**Logic:** Check if `campaign.twilio_conversation_sid` is null/empty — if so, it's "Manually Created"; otherwise, "Auto (WhatsApp)".
+
+**UI:** A small labeled field matching the existing pattern:
+```
+<h4 className="font-medium text-sm text-muted-foreground">Source</h4>
+<Badge variant="outline">Manually Created</Badge>
+// or
+<Badge variant="info">WhatsApp Bot</Badge>
 ```
 
-with:
-
-```js
-const optionValue = getOptionText(question, option);
-```
-
-This ensures `value_json.selected_values` stores the human-readable text (e.g., `"Under $500k"`) instead of `"Option A"`, matching the format used by the WhatsApp bot. One-line change, high confidence fix.
+Single file change, ~10 lines added.
 
